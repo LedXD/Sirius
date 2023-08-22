@@ -1,16 +1,17 @@
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const config = require('./config');
+require('dotenv').config();
 
 const { Collection, GatewayIntentBits } = require('discord.js');
 const { Client, Enums } = require('fnbr');
 const { readFile, writeFile } = require('fs').promises;
 
 async function getCosmetic(name, backend) {
-  const url = 'https://fortnite-api.com/v2/cosmetics/br/search' +
-  `?name=${name}` +
-  `&backendType=${backend}` +
-  `&matchMethod=contains`;
+  const url = `https://fortnite-api.com/v2/cosmetics/br/search` +
+    `?name=${name}` +
+    `&backendType=${backend}` +
+    `&matchMethod=contains`;
 
   return (await fetch(url)).json();
 }
@@ -23,29 +24,41 @@ async function getCosmetic(name, backend) {
     debug: false,
     kairos: {
       cid: config.fortnite.cid[0] ? config.fortnite.cid[0] : config.fortnite.cid,
-      color: Enums.KairosColor.GRAY
+      privacy: Enums.PartyPrivacy.PUBLIC,
     },
-    auth: {}
-  }
+    auth: {},
+  };
 
-  const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+  const client = new Discord.Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
+  });
 
   client.commands = new Collection();
   client.aliases = new Collection();
 
-  ['command'].forEach(handler => {
+  const fs = require('fs');
+  const functions = fs.readdirSync('./src/functions').filter((file) => file.endsWith('.js'));
+  const eventFiles = fs.readdirSync('./src/events').filter((file) => file.endsWith('.js'));
+  const commandFolders = fs.readdirSync('./src/slcommands');
+
+  ['command'].forEach((handler) => {
     require(`./${handler}`)(client);
   });
 
   try {
     Options.auth.deviceAuth = JSON.parse(await readFile('./deviceAuth.json'));
   } catch (e) {
-    Options.auth.authorizationCode = async () => Client.consoleQuestion('[SIRIUS] [FORTNITE] Please enter an authorization code: ');
+    Options.auth.authorizationCode = async () =>
+      Client.consoleQuestion('[SIRIUS] [FORTNITE] Please enter an authorization code: ');
   }
 
   const bot = new Client(Options);
 
-  client.on('message', async message => {
+  client.on('message', async (message) => {
     if (!message.content.startsWith(config.discord.prefix)) return;
 
     if (config.discord.ownerOnly && !config.discord.ownerIDs.includes(message.author.id)) return;
@@ -64,11 +77,12 @@ async function getCosmetic(name, backend) {
     }
   });
 
-  if (config.discord.token === 'TOKEN') return console.log('[SIRIUS] [DISCORD]', 'Please enter a valid token in config.js');
+  if (config.discord.token === 'TOKEN')
+    return console.log('[SIRIUS] [DISCORD]', 'Please enter a valid token in config.js');
 
   bot.on('deviceauth:created', (da) => writeFile('./deviceAuth.json', JSON.stringify(da, null, 2)));
 
-  bot.on('party:member:joined', member => {
+  bot.on('party:member:joined', (member) => {
     if (member.displayName === bot.user.displayName) return;
     console.log('[SIRIUS] [FORTNITE]', `${member.displayName} has joined the party. New member count: ${bot.party.members.size}.`);
     if (!config.fortnite.joinMessage || config.fortnite.joinMessage === '') return;
@@ -76,7 +90,7 @@ async function getCosmetic(name, backend) {
     bot.party.sendMessage(msg);
   });
 
-  bot.on('party:invite', invite => {
+  bot.on('party:invite', (invite) => {
     console.log('[SIRIUS] [FORTNITE]', `Received a party invite from ${invite.sender.displayName}.`);
 
     if (config.fortnite.acceptInvite) {
@@ -88,7 +102,7 @@ async function getCosmetic(name, backend) {
     console.log('[SIRIUS] [FORTNITE]', `Invite from ${invite.sender.displayName} has been ${config.fortnite.acceptInvite ? 'accepted' : 'declined'}.`);
   });
 
-  bot.on('friend:request', request => {
+  bot.on('friend:request', (request) => {
     console.log('[SIRIUS] [FORTNITE]', `Received a friend request from ${request.displayName}.`);
 
     if (config.fortnite.acceptFriend) {
@@ -105,7 +119,7 @@ async function getCosmetic(name, backend) {
       cid: config.fortnite.cid,
       bid: config.fortnite.bid,
       eid: config.fortnite.eid,
-      pickaxe_id: config.fortnite.pickaxe_id
+      pickaxe_id: config.fortnite.pickaxe_id,
     };
 
     bot.party.me.setOutfit(cosmetics.cid);
@@ -115,12 +129,26 @@ async function getCosmetic(name, backend) {
   });
 
   await bot.login();
-  client.login(config.discord.token);
+
+  for (const file of functions) {
+    require(`./functions/${file}`)(client);
+  }
+
+  client.handleEvents(eventFiles, './src/events');
+  client.handleCommands(commandFolders, './src/slashcommands');
+  client.login(process.env.token);
 
   client.on('ready', () => {
-    const replaced = config.discord.status.replace('%clientUserDisplayName%', bot.user.displayName).replace('%PartyMemberCount%', bot.party.members.size).replace('%ClientPartyUserOutfit%', bot.party.me.outfit)
-    .replace('%ClientPartyUserPickaxe%', bot.party.me.pickaxe).replace('%ClientPartyUserEmote%', bot.party.me.emote).replace('%ClientPartyUserBackpack%', bot.party.me.backpack)
-    .replace('%ClientPartyUserIsReady%', bot.party.me.isReady).replace('%ClientPartyUserIsLeader%', bot.party.me.isLeader).replace('%ClientUserID%', bot.id);
+    const replaced = config.discord.status
+      .replace('%clientUserDisplayName%', bot.user.displayName)
+      .replace('%PartyMemberCount%', bot.party.members.size)
+      .replace('%ClientPartyUserOutfit%', bot.party.me.outfit)
+      .replace('%ClientPartyUserPickaxe%', bot.party.me.pickaxe)
+      .replace('%ClientPartyUserEmote%', bot.party.me.emote)
+      .replace('%ClientPartyUserBackpack%', bot.party.me.backpack)
+      .replace('%ClientPartyUserIsReady%', bot.party.me.isReady)
+      .replace('%ClientPartyUserIsLeader%', bot.party.me.isLeader)
+      .replace('%ClientUserID%', bot.id);
 
     client.user.setActivity(replaced, { type: config.discord.statusType });
 

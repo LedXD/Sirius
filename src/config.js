@@ -3,7 +3,6 @@ module.exports = {
 	discord: {
 		status: '%clientUserDisplayName%\'s account.', // The status of the Discord client.
 		statusType: 'WATCHING', // The type of the Discord status.
-		token: 'TOKEN', // Discord token.
 		prefix: '>', // Discord prefix.
 		ownerIDs: ['OWNER_ID'], // The people that can use your bot.
 		ownerOnly: true // Recommended.
