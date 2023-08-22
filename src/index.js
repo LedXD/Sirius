@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const config = require('./config');
 
-const { Collection } = require('discord.js');
+const { Collection, GatewayIntentBits } = require('discord.js');
 const { Client, Enums } = require('fnbr');
 const { readFile, writeFile } = require('fs').promises;
 
@@ -28,7 +28,7 @@ async function getCosmetic(name, backend) {
     auth: {}
   }
 
-  const client = new Discord.Client();
+  const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
   client.commands = new Collection();
   client.aliases = new Collection();

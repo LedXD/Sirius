@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
   name: 'info',
@@ -28,8 +28,8 @@ module.exports = {
       members: bot.party.members
     }
 
-    const embed = new MessageEmbed()
-    .setColor('RANDOM')
+    const embed = new EmbedBuilder()
+    .setColor('Red')
     .setAuthor('Info')
     .addField('Client', `Name ➟ ${bot.user.displayName}`, true)
     .addField('Friends', `Total ➟ ${bot.friends.size}\nIncoming Friend Requests ➟ ${friends.incoming.size}\nOutgoing Friend Requests ➟ ${friends.outgoing.size}\nBlocked ➟ ${friends.blocked.size}`, true)

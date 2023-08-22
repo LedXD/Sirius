@@ -14,7 +14,7 @@
   "author": "Sirius Team",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.3.1",
+    "discord.js": "^14.11.0",
     "fnbr": "^1.4.1",
     "node-fetch": "^2.6.1"
   }

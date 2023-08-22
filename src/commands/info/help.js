@@ -1,5 +1,5 @@
 const config = require('../../config.js');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
   name: 'help',
@@ -24,8 +24,8 @@ module.exports = {
     if (!command) command = client.commands.get(client.aliases.get(args[0]));
 
     if (command) {
-      const cmdEmbed = new MessageEmbed()
-      .setColor('RANDOM')
+      const cmdEmbed = new EmbedBuilder()
+      .setColor('Blue')
       .setAuthor('Command')
       .setDescription(`
        Name ➟ **${command.name}**
@@ -38,8 +38,8 @@ module.exports = {
        .setFooter(`Sirius | ${client.commands.size} commands`, 'https://cdn.discordapp.com/attachments/749665296226189312/765248124666511390/unknown.png');
        message.channel.send(cmdEmbed);
     } else {
-    const embed = new MessageEmbed()
-    .setColor('RANDOM')
+    const embed = new EmbedBuilder()
+    .setColor('Red')
     .setAuthor('Commands')
     .setDescription(`Here's a list of available commands, use \`${prefix}help <command>\` to view more about a command.\n[Join our Discord server!](https://discord.io/siriuss)`)
     .addField(`Client [${commands.client.size}]`, commands.client.map(x => `\`${x.name}\``).join(', '))

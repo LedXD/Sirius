@@ -1,14 +1,14 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
-const good = new MessageEmbed()
-.setColor('GREEN')
-.setAuthor('Success')
-.setFooter('Sirius', 'https://cdn.discordapp.com/attachments/749665296226189312/765248124666511390/unknown.png');
+const good = new EmbedBuilder()
+.setColor('Green')
+.setDescription('Success');
 
-const bad = new MessageEmbed()
-.setColor('RED')
-.setAuthor('Error')
-.setFooter('Sirius', 'https://cdn.discordapp.com/attachments/749665296226189312/765248124666511390/unknown.png');
+
+const bad = new EmbedBuilder()
+.setColor('Red')
+.setDescription('Error');
+
 
 function success(cosmetic, message) {
   good.setDescription(`**${cosmetic.data.name}** [**${cosmetic.data.id}**] has been equipped.`);

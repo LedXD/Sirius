@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
   name: 'ping',
@@ -9,8 +9,8 @@ module.exports = {
 
   run: async (client, bot, message, args, getCosmetic) => {
     const ping = client.ws.ping;
-    const embed = new MessageEmbed()
-    .setColor('RANDOM')
+    const embed = new EmbedBuilder()
+    .setColor('Red')
     .setTitle('Client Connection')
     .addField('Discord', `\`${ping} ms\``, true)
 
