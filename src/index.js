@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const config = require('./config');
+const { REST } = require("@discordjs/rest");
+const { Routes } = require('discord-api-types/v9')
 require('dotenv').config();
 
 const { Collection, GatewayIntentBits } = require('discord.js');
@@ -39,6 +41,9 @@ async function getCosmetic(name, backend) {
 
   client.commands = new Collection();
   client.aliases = new Collection();
+  
+  client.slashcommands = new Collection();
+
 
   const fs = require('fs');
   const functions = fs.readdirSync('./src/functions').filter((file) => file.endsWith('.js'));
@@ -135,8 +140,45 @@ async function getCosmetic(name, backend) {
   }
 
   client.handleEvents(eventFiles, './src/events');
-  client.handleCommands(commandFolders, './src/slashcommands');
+  
   client.login(process.env.token);
+
+
+  const clientId = '1122584731498840104';
+const path = require('path');
+client.commandArray = [];
+
+for (const folder of commandFolders) {
+  const commandFiles = fs.readdirSync(`./src/slcommands/${folder}`).filter(file => file.endsWith('.js'));
+  for (const file of commandFiles) {
+    const command = require(`./src/slcommands/${folder}/${file}`);
+    client.commands.set(command.data.name, command);
+  }
+        }
+        const rest = new REST({
+          version: '9'
+      }).setToken(process.env.token);
+
+      (async () => {
+          try {
+              console.log('Started refreshing application (/) commands.');
+
+              await rest.put(
+                  Routes.applicationCommands(clientId), {
+                      body: client.commandArray
+                  },
+              );
+
+              console.log('Successfully reloaded application (/) commands.');
+          } catch (error) {
+              console.error(error);
+          }
+      })
+
+
+    
+
+
 
   client.on('ready', () => {
     const replaced = config.discord.status
